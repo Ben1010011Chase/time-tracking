@@ -1,6 +1,7 @@
 import sqlite3
-import time
+import time, datetime
 import re
+import sys
 
 def create_table():
     conn = sqlite3.connect('task_times.db')
@@ -77,19 +78,29 @@ def print_task_time_stats():
     today_total_time = sum([parse_time(t) for t in today_task_times])
     week_task_times = get_week_task_times()
     week_total_time = sum([parse_time(t) for t in week_task_times])
-    print(f"Total time today: {format_time(today_total_time)}")
-    print(f"Total time this week: {format_time(week_total_time)}")
-    print()
+    print(f"\nTotal time today: {format_time(today_total_time)}")
+    print(f"Total time this week: {format_time(week_total_time)}\n")
+
+
+def timer(target_time):
+    for time_elapsed in range(1, target_time+1, 1):
+        minutes = time_elapsed // 60
+        seconds = time_elapsed % 60
+        sys.stdout.write("\r")
+        sys.stdout.write("{:02d}:{:02d} elapsed.".format(minutes, seconds))
+        sys.stdout.flush()
+        time.sleep(1)
 
 while True:
+    print_task_time_stats()
+
     try:
         task_time_str = input(f"Enter task time in MM:SS format (default {default_task_time//60}:{default_task_time%60:02d}): ")
         if not task_time_str:
             task_time = default_task_time
+            timer(task_time)
         elif task_time_str.lower() == 'undo':
             delete_last_task_time()
-            print("Last task time deleted")
-            print_task_time_stats()
             continue
         else:
             # Validate input format
@@ -98,6 +109,7 @@ while True:
             # Convert to seconds
             m, s = task_time_str.split(':')
             task_time = int(s) + int(m) * 60
+            timer(task_time)
     except ValueError as e:
         print(e)
         continue
@@ -106,7 +118,4 @@ while True:
         break
 
     insert_task_time(task_time)
-    print_task_time_stats()
-
-
- 
+    
