@@ -70,6 +70,7 @@ def get_week_task_times():
     conn.close()
     return [format_time(t[0]) for t in task_times]
 
+
 create_table()
 default_task_time = 80  # seconds
 
@@ -81,15 +82,19 @@ def print_task_time_stats():
     print(f"\nTotal time today: {format_time(today_total_time)}")
     print(f"Total time this week: {format_time(week_total_time)}\n")
 
-
 def timer(target_time):
-    for time_elapsed in range(1, target_time+1, 1):
-        minutes = time_elapsed // 60
-        seconds = time_elapsed % 60
+    try:
+        for time_elapsed in range(1, target_time+1, 1):
+            minutes = time_elapsed // 60
+            seconds = time_elapsed % 60
+            sys.stdout.write("\r")
+            sys.stdout.write("{:02d}:{:02d} elapsed.".format(minutes, seconds))
+            sys.stdout.flush()
+            time.sleep(1)
+    except KeyboardInterrupt:
         sys.stdout.write("\r")
-        sys.stdout.write("{:02d}:{:02d} elapsed.".format(minutes, seconds))
+        sys.stdout.write("Timer stopped early.")
         sys.stdout.flush()
-        time.sleep(1)
 
 while True:
     print_task_time_stats()
@@ -118,4 +123,3 @@ while True:
         break
 
     insert_task_time(task_time)
-    
